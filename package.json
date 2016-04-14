@@ -17,7 +17,8 @@
   ],
    "node-red"     : {
         "nodes": {
-            "mqtt-dynamic": "mqtt-dynamic.js"
+            "mqtt-dynamic": "mqtt-dynamic.js",
+            "mqtt-dynamic complete" : "mqtt-dynamic-complete.js"
         }
    },    
   "author": "Sajay Antony",

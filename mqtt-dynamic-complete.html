@@ -1,0 +1,26 @@
+<script type="text/javascript">
+    RED.nodes.registerType('mqtt-dynamic complete',{
+        category: 'function',
+        color:"#d8bfd8",
+        defaults: {
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "function.png",
+        label: function() {
+            return this.name||"Complete MQTT";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="mqtt-dynamic complete">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="mqtt-dynamic complete">
+    <p>A block that allow the MQTT receiver to complete message processing and pick up the next message.</p>
+</script>

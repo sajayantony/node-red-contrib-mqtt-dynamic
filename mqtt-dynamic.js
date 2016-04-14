@@ -319,7 +319,7 @@ module.exports = function(RED) {
                     }
                     
                     var callbackComplete = function(){
-                        console.log("mqtt-dyamic complete handleMessage.");
+                        //console.log("mqtt-dyamic complete handleMessage.");
                         if(mqttHandleCallback){
                             mqttHandleCallback();
                         }                            
