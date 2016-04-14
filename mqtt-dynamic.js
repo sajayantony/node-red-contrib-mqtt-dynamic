@@ -27,12 +27,13 @@ module.exports = function(RED) {
         var re = new RegExp("^"+ts.replace(/([\[\]\?\(\)\\\\$\^\*\.|])/g,"\\$1").replace(/\+/g,"[^/]+").replace(/\/#$/,"(\/.*)?")+"$");
         return re.test(t);
     }
-
+    
     function MQTTBrokerNode(n) {
-        RED.nodes.createNode(this,n);
-
+        RED.nodes.createNode(this,n);        
+        
         // Configuration options passed by Node Red
-        this.broker = n.broker;
+        updateFromSettings(n);
+        this.broker = n.broker;        
         this.port = n.port;
         this.clientid = n.clientid;
         this.usetls = n.usetls;
@@ -300,6 +301,7 @@ module.exports = function(RED) {
 
     function MQTTInNode(n) {
         RED.nodes.createNode(this,n);
+        updateFromSettings(n);
         this.topic = n.topic;
         this.broker = n.broker;
         this.brokerConn = RED.nodes.getNode(this.broker);
@@ -391,4 +393,29 @@ module.exports = function(RED) {
         }
     }
     RED.nodes.registerType("mqtt-dynamic out",MQTTOutNode);
+    
+    function getDescendantProp(obj, propertyName) {
+        var arr = propertyName.split(".");
+        while(arr.length && (obj = obj[arr.shift()]));
+        return obj;
+    }
+        
+    function resolveKeys(key, settings) {
+        if(key && (typeof key)=="string")
+        {
+            var found = key.match(/{(.*)}/);
+            if(found)
+            {
+                var propertyName = found[1]; //capturing group value.
+                key = getDescendantProp(settings, propertyName)||key;
+            }
+        }
+        return key;
+    }
+    
+    function updateFromSettings(object) {
+        for(var key in object) {
+                object[key] = resolveKeys(object[key], RED.settings);
+        }
+    }
 };
