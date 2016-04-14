@@ -11,7 +11,7 @@
   limitations under the License.
 -->
 
-<script type="text/x-red" data-template-name="mqtt in">
+<script type="text/x-red" data-template-name="mqtt-dynamic in">
     <div class="form-row">
         <label for="node-input-broker"><i class="fa fa-globe"></i> <span data-i18n="mqtt.label.broker"></span></label>
         <input type="text" id="node-input-broker">
@@ -26,7 +26,7 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="mqtt in">
+<script type="text/x-red" data-help-name="mqtt-dynamic in">
     <p>Connects to a broker and subscribes to the specified topic.</p>
     <p>Outputs a message with the properties:</p>
     <ul>
@@ -35,16 +35,18 @@
        <li><code>msg.qos</code></li>
        <li><code>msg.retain</code></li>
     </ul>
+    <p>Ensure you call <code>msg.mqttHandleMessageComplete()</code> to unblock the message pump.</p>
+    
     <p><code>msg.payload</code> will be a String, unless it is detected as a binary buffer.</p>
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('mqtt in',{
+    RED.nodes.registerType('mqtt-dynamic in',{
         category: 'input',
         defaults: {
             name: {value:""},
             topic: {value:"",required:true,validate: RED.validators.regex(/^(#$|(\+|[^+#]*)(\/(\+|[^+#]*))*(\/(\+|#|[^+#]*))?$)/)},
-            broker: {type:"mqtt-broker", required:true}
+            broker: {type:"mqtt-dynamic-broker", required:true}
         },
         color:"#d8bfd8",
         inputs:0,
@@ -59,7 +61,7 @@
     });
 </script>
 
-<script type="text/x-red" data-template-name="mqtt out">
+<script type="text/x-red" data-template-name="mqtt-dynamic out">
     <div class="form-row">
         <label for="node-input-broker"><i class="fa fa-globe"></i> <span data-i18n="mqtt.label.broker"></span></label>
         <input type="text" id="node-input-broker">
@@ -89,7 +91,7 @@
     <div class="form-tips"><span data-i18n="mqtt.tip"></span></div>
 </script>
 
-<script type="text/x-red" data-help-name="mqtt out">
+<script type="text/x-red" data-help-name="mqtt-dynamic out">
     <p>Connects to a MQTT broker and publishes messages.</p>
     <p>The topic used can be configured in the node or, if left blank, can be set
        by <code>msg.topic</code>.</p>
@@ -101,14 +103,14 @@
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('mqtt out',{
+    RED.nodes.registerType('mqtt-dynamic out',{
         category: 'output',
         defaults: {
             name: {value:""},
             topic: {value:""},
             qos: {value:""},
             retain: {value:""},
-            broker: {type:"mqtt-broker", required:true}
+            broker: {type:"mqtt-dynamic-broker", required:true}
         },
         color:"#d8bfd8",
         inputs:1,
@@ -124,7 +126,7 @@
     });
 </script>
 
-<script type="text/x-red" data-template-name="mqtt-broker">
+<script type="text/x-red" data-template-name="mqtt-dynamic-broker">
     <div class="form-row">
         <ul style="background: #fff; min-width: 600px; margin-bottom: 20px;" id="node-config-mqtt-broker-tabs"></ul>
     </div>
@@ -221,7 +223,7 @@
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('mqtt-broker',{
+    RED.nodes.registerType('mqtt-dynamic-broker',{
         category: 'config',
         defaults: {
             broker: {value:"",required:true},

@@ -174,7 +174,10 @@ module.exports = function(RED) {
                         var qos = 0;
                         for (var r in node.subscriptions[s]) {
                             qos = Math.max(qos,node.subscriptions[s][r].qos);
-                            node.client.on('message',node.subscriptions[s][r].handler);
+                            //node.client.on('message',node.subscriptions[s][r].handler);
+                            node.client.handleMessage = function(packet,callback){           
+                               node.subscriptions[s][r].handler(topic,packet.payload,packet, callback); 
+                            }
                         }
                         var options = {qos: qos};
                         node.client.subscribe(topic, options);
@@ -223,9 +226,9 @@ module.exports = function(RED) {
             var sub = {
                 topic:topic,
                 qos:qos,
-                handler:function(mtopic,mpayload, mpacket) {
+                handler:function(mtopic,mpayload, mpacket, handleMessageCallback) {
                     if (matchTopic(topic,mtopic)) {
-                        callback(mtopic,mpayload, mpacket);
+                        callback(mtopic,mpayload, mpacket, handleMessageCallback);
                     }
                 },
                 ref: ref
@@ -288,7 +291,7 @@ module.exports = function(RED) {
 
     }
 
-    RED.nodes.registerType("mqtt-broker",MQTTBrokerNode,{
+    RED.nodes.registerType("mqtt-dynamic-broker",MQTTBrokerNode,{
         credentials: {
             user: {type:"text"},
             password: {type: "password"}
@@ -308,13 +311,23 @@ module.exports = function(RED) {
             this.status({fill:"red",shape:"ring",text:"common.status.disconnected"});
             if (this.topic) {
                 node.brokerConn.register(this);
-                this.brokerConn.subscribe(this.topic,2,function(topic,payload,packet) {
+                this.brokerConn.subscribe(this.topic,2,function(topic,payload,packet, mqttHandleCallback) {
                     if (isUtf8(payload)) { payload = payload.toString(); }
                     var msg = {topic:topic,payload:payload, qos: packet.qos, retain: packet.retain};
                     if ((node.brokerConn.broker === "localhost")||(node.brokerConn.broker === "127.0.0.1")) {
                         msg._topic = topic;
                     }
+                    
+                    var callbackComplete = function(){
+                        console.log("mqtt-dyamic complete handleMessage.");
+                        if(mqttHandleCallback){
+                            mqttHandleCallback();
+                        }                            
+                    };
+                                                                                
+                    msg.mqttHandleMessageComplete = callbackComplete;                                    
                     node.send(msg);
+                                        
                 }, this.id);
                 if (this.brokerConn.connected) {
                     node.status({fill:"green",shape:"dot",text:"common.status.connected"});
@@ -333,7 +346,7 @@ module.exports = function(RED) {
             this.error(RED._("mqtt.errors.missing-config"));
         }
     }
-    RED.nodes.registerType("mqtt in",MQTTInNode);
+    RED.nodes.registerType("mqtt-dynamic in",MQTTInNode);
 
     function MQTTOutNode(n) {
         RED.nodes.createNode(this,n);
@@ -377,5 +390,5 @@ module.exports = function(RED) {
             this.error(RED._("mqtt.errors.missing-config"));
         }
     }
-    RED.nodes.registerType("mqtt out",MQTTOutNode);
+    RED.nodes.registerType("mqtt-dynamic out",MQTTOutNode);
 };
