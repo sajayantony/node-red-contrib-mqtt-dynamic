@@ -33,6 +33,7 @@ module.exports = function(RED) {
         
         // Configuration options passed by Node Red
         updateFromSettings(n);
+        updateFromSettings(this.credentials);
         this.broker = n.broker;        
         this.port = n.port;
         this.clientid = n.clientid;
