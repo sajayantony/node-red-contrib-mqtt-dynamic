@@ -322,7 +322,10 @@ module.exports = function(RED) {
                     }
                     
                     var callbackComplete = function(){
+                        
                         //console.log("mqtt-dyamic complete handleMessage.");
+                        //complete should be idempotent.
+                        msg.mqttHandleMessageComplete = function(){};
                         if(mqttHandleCallback){
                             mqttHandleCallback();
                         }                            
