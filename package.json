@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-mqtt-dynamic",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Mqtt with backpressure support",
   "main": "mqtt-dynamic.js",
   "scripts": {

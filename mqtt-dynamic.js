@@ -174,17 +174,20 @@ module.exports = function(RED) {
                     for (var s in node.subscriptions) {
                         var topic = s;
                         var qos = 0;
-                        // for (var r in node.subscriptions[s]) {
-                        //     qos = Math.max(qos,node.subscriptions[s][r].qos);
-                        //     node.client.on('message',node.subscriptions[s][r].handler);
-                        // }
-                        node.client.handleMessage = function(packet,callback) {   
-                              for(var s in node.subscriptions)
-                                for(var r in node.subscriptions[s])
-                                {
-                                    node.subscriptions[s][r].handler(packet.topic, packet.payload, packet, callback);    
-                                }                                                            
-                        };
+                        if (node.async) {
+                            for (var r in node.subscriptions[s]) {
+                                qos = Math.max(qos, node.subscriptions[s][r].qos);
+                                node.client.on('message', node.subscriptions[s][r].handler);
+                            }
+                        }
+                        else {
+                            node.client.handleMessage = function (packet, callback) {
+                                for (var s in node.subscriptions)
+                                    for (var r in node.subscriptions[s]) {
+                                        node.subscriptions[s][r].handler(packet.topic, packet.payload, packet, callback);
+                                    }
+                            };                            
+                        }
                         var options = {qos: qos};
                         node.client.subscribe(topic, options);
                     }
@@ -307,9 +310,11 @@ module.exports = function(RED) {
     function MQTTInNode(n) {
         RED.nodes.createNode(this,n);
         updateFromSettings(n);
+        this.async = (n.async && n.async.toLowerCase() == 'true') ? true : false;
         this.topic = n.topic;
         this.broker = n.broker;
         this.brokerConn = RED.nodes.getNode(this.broker);
+        this.brokerConn.async = this.async;
         if (!/^(#$|(\+|[^+#]*)(\/(\+|[^+#]*))*(\/(\+|#|[^+#]*))?$)/.test(this.topic)) {
             return this.warn(RED._("mqtt.errors.invalid-topic"));
         }
@@ -325,17 +330,19 @@ module.exports = function(RED) {
                         msg._topic = topic;
                     }
                     
-                    var callbackComplete = function(){
-                        
-                        //console.log("mqtt-dyamic complete handleMessage.");
-                        //complete should be idempotent.
-                        msg.mqttHandleMessageComplete = function(){};
-                        if(mqttHandleCallback){
-                            mqttHandleCallback();
-                        }                            
-                    };
-                                                                                
-                    msg.mqttHandleMessageComplete = callbackComplete;                                    
+                    if (!node.async) {
+                        var callbackComplete = function () {
+                            //console.log("mqtt-dyamic complete handleMessage.");
+                            //complete should be idempotent.
+                            msg.mqttHandleMessageComplete = function () { };
+                            if (mqttHandleCallback) {
+                                mqttHandleCallback();
+                            }
+                        };
+
+                        msg.mqttHandleMessageComplete = callbackComplete;
+                    }
+                    
                     node.send(msg);
                                         
                 }, this.id);

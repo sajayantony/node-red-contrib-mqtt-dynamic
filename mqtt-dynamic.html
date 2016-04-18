@@ -24,6 +24,10 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
+    <div class="form-row">
+        <label for="node-input-async"><i class="fa fa-tag"></i><span>Asynchronous</span></label>
+        <input type="text" id="node-input-async">
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="mqtt-dynamic in">
@@ -44,9 +48,10 @@
     RED.nodes.registerType('mqtt-dynamic in',{
         category: 'input',
         defaults: {
-            name: {value:""},
+            name: {value:""},            
             topic: {value:"",required:true,validate: RED.validators.regex(/^(#$|(\+|[^+#]*)(\/(\+|[^+#]*))*(\/(\+|#|[^+#]*))?$)/)},
-            broker: {type:"mqtt-dynamic-broker", required:true}
+            broker: {type:"mqtt-dynamic-broker", required:true},
+            async : {value : false},
         },
         color:"#d8bfd8",
         inputs:0,
