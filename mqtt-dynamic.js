@@ -174,13 +174,17 @@ module.exports = function(RED) {
                     for (var s in node.subscriptions) {
                         var topic = s;
                         var qos = 0;
-                        for (var r in node.subscriptions[s]) {
-                            qos = Math.max(qos,node.subscriptions[s][r].qos);
-                            //node.client.on('message',node.subscriptions[s][r].handler);
-                            node.client.handleMessage = function(packet,callback){           
-                               node.subscriptions[s][r].handler(topic,packet.payload,packet, callback); 
-                            }
-                        }
+                        // for (var r in node.subscriptions[s]) {
+                        //     qos = Math.max(qos,node.subscriptions[s][r].qos);
+                        //     node.client.on('message',node.subscriptions[s][r].handler);
+                        // }
+                        node.client.handleMessage = function(packet,callback) {   
+                              for(var s in node.subscriptions)
+                                for(var r in node.subscriptions[s])
+                                {
+                                    node.subscriptions[s][r].handler(packet.topic, packet.payload, packet, callback);    
+                                }                                                            
+                        };
                         var options = {qos: qos};
                         node.client.subscribe(topic, options);
                     }
