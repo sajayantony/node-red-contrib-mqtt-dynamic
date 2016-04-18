@@ -353,6 +353,7 @@ module.exports = function(RED) {
 
     function MQTTOutNode(n) {
         RED.nodes.createNode(this,n);
+        updateFromSettings(n);
         this.topic = n.topic;
         this.qos = n.qos || null;
         this.retain = n.retain;
@@ -397,26 +398,27 @@ module.exports = function(RED) {
     
     function getDescendantProp(obj, propertyName) {
         var arr = propertyName.split(".");
-        while(arr.length && (obj = obj[arr.shift()]));
+        while (arr.length && (obj = obj[arr.shift()]));
         return obj;
     }
-        
+
     function resolveKeys(key, settings) {
-        if(key && (typeof key)=="string")
-        {
-            var found = key.match(/{(.*)}/);
-            if(found)
-            {
-                var propertyName = found[1]; //capturing group value.
-                key = getDescendantProp(settings, propertyName)||key;
-            }
+
+        if (key && (typeof key) == "string") {
+            var exp = /({([^:]+?)})/;
+            do {
+                key = key.replace(exp, function (match, $1, $2) {
+                    var value = getDescendantProp(settings, $2);
+                    return ((typeof value) == 'string') ? value : JSON.stringify(value);
+                }) || key;
+            } while (exp.test(key) && (typeof key) == "string");
         }
         return key;
     }
-    
+
     function updateFromSettings(object) {
-        for(var key in object) {
-                object[key] = resolveKeys(object[key], RED.settings);
+        for (var key in object) {
+            object[key] = resolveKeys(object[key], RED.settings);
         }
     }
 };
