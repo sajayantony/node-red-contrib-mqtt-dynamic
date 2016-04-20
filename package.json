@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-mqtt-dynamic",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Mqtt with backpressure support",
   "main": "mqtt-dynamic.js",
   "scripts": {
@@ -22,7 +22,7 @@
     }
   },
   "author": "Sajay Antony",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/sajayantony/node-red-contrib-mqtt-dynamic/issues"
   },
