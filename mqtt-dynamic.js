@@ -174,9 +174,11 @@ module.exports = function(RED) {
                     for (var s in node.subscriptions) {
                         var topic = s;
                         var qos = 0;
+                        for (var r in node.subscriptions[s]) {
+                            qos = Math.max(qos, node.subscriptions[s][r].qos);
+                        }
                         if (node.async) {
                             for (var r in node.subscriptions[s]) {
-                                qos = Math.max(qos, node.subscriptions[s][r].qos);
                                 node.client.on('message', node.subscriptions[s][r].handler);
                             }
                         }
